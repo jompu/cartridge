@@ -1,5 +1,5 @@
 from __future__ import absolute_import, unicode_literals
-from future.builtins import bytes, zip, str as _str
+from future.builtins import bytes, zip
 
 import hmac
 from locale import setlocale, LC_MONETARY, Error as LocaleError
@@ -10,6 +10,7 @@ except ImportError:
     from md5 import new as digest
 
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.encoding import smart_str as _str
 from django.utils.translation import ugettext as _
 
 from mezzanine.conf import settings
@@ -49,12 +50,13 @@ def recalculate_cart(request):
         request.session['cart'] = request.cart.pk
     request.cart = Cart.objects.from_request(request)
 
+    names = ("free_shipping", "discount_code", "discount_total")
+    clear_session(request, *names)
+
     discount_code = request.session.get("discount_code", "")
     if discount_code:
         # Clear out any previously defined discount code
         # session vars.
-        names = ("free_shipping", "discount_code", "discount_total")
-        clear_session(request, *names)
         discount_form = DiscountForm(request, {"discount_code": discount_code})
         if discount_form.is_valid():
             discount_form.set_discount()
@@ -74,6 +76,7 @@ def set_shipping(request, shipping_type, shipping_total):
     """
     Stores the shipping type and total in the session.
     """
+    print _str(shipping_type)
     request.session["shipping_type"] = _str(shipping_type)
     request.session["shipping_total"] = _str(shipping_total)
 

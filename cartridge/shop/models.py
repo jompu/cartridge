@@ -19,6 +19,7 @@ from django.utils.translation import (ugettext, ugettext_lazy as _,
 
 from django.utils.encoding import force_text
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.safestring import mark_safe
 
 from mezzanine.conf import settings
 from mezzanine.core.fields import FileField
@@ -112,6 +113,8 @@ class Product(Displayable, Priced, RichText, AdminThumbMixin):
     admin_thumb_field = "image"
 
     search_fields = {"variations__sku": 100}
+
+    weight = models.IntegerField(_("Weight"), blank=True, null=True, help_text=_("Define primary order with weight."))
 
     class Meta:
         verbose_name = _("Product")
@@ -348,6 +351,8 @@ class Category(Page, RichText):
         "products must match all specified filters, otherwise products "
         "can match any specified filter."))
 
+    weight = models.IntegerField(_("Weight"), blank=True, null=True, help_text=_("Set the relevance of products with the weight."))
+
     class Meta:
         verbose_name = _("Product category")
         verbose_name_plural = _("Product categories")
@@ -441,6 +446,26 @@ class Order(SiteRelated):
                             choices=settings.SHOP_ORDER_STATUS_CHOICES,
                             default=settings.SHOP_ORDER_STATUS_CHOICES[0][0])
 
+    delivery_method = CharField(_("Delivery method"), blank=True, default="pickup",
+        choices=(("pickup",_("Pickup")),("mh",_("Matkahuolto"))), max_length=254)
+    mh_service_point_full = CharField( 
+        _("Matkahuolto service point"),
+        blank=True,
+        max_length=254
+    )
+    mh_service_point_id_name = CharField( 
+        _("Matkahuolto service point id and name"),
+        blank=True,
+        max_length=254
+    )
+    mh_shipment_number = CharField( 
+        _("Matkahuolto shipment number"),
+        default="",
+        blank=True,
+        max_length=255
+    )
+
+
     objects = managers.OrderManager()
 
     # These are fields that are stored in the session. They're copied to
@@ -469,6 +494,7 @@ class Order(SiteRelated):
         """
         self.key = request.session.session_key
         self.user_id = request.user.id
+        
         for field in self.session_fields:
             if field in request.session:
                 setattr(self, field, request.session[field])
@@ -534,6 +560,24 @@ class Order(SiteRelated):
         return "<a href='%s?format=pdf'>%s</a>" % (url, text)
     invoice.allow_tags = True
     invoice.short_description = ""
+
+    def get_mh_card(self):
+        title = _("Get MH card")
+        if self.delivery_method == "mh":
+            if not self.mh_shipment_number:
+                return mark_safe("<script>open_download_card_form = function(url, title) { \
+                      w=window.open(url, title,'height=500,width=700,scrollbars=yes'); \
+                      w.onunload = function() {window.location.reload(true);}; \
+                      if(window.focus){w.focus();}};</script> \
+                      <a href='#' onclick='javascript: \
+                      open_download_card_form(\"/matkahuolto/download_card_form/%d\", \"%s\")'>%s</a>" \
+                    % (self.id, title, title))
+            else:
+                return mark_safe('<a target="_blank"' \
+                    'href="https://extservices.matkahuolto.fi/mpakettiext/?0&amp;gatewayed=true.">'
+                    'Edit in MPaketti service</a>')
+        else:
+            return ""
 
 
 class Cart(models.Model):

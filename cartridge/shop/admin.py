@@ -51,6 +51,8 @@ from cartridge.shop.models import ProductVariation, ProductOption, Order
 from cartridge.shop.models import OrderItem, Sale, DiscountCode
 from cartridge.shop.views import HAS_PDF
 
+from django.contrib.sites.models import Site
+current_domain = Site.objects.get_current().domain
 
 # Lists of field names.
 option_fields = [f.name for f in ProductVariation.option_fields()]
@@ -125,6 +127,7 @@ class ProductImageAdmin(TabularDynamicInlineAdmin):
 
 product_fieldsets = deepcopy(DisplayableAdmin.fieldsets)
 product_fieldsets[0][1]["fields"].insert(2, "available")
+product_fieldsets[0][1]["fields"].insert(3, "weight")
 product_fieldsets[0][1]["fields"].extend(["content", "categories"])
 product_fieldsets = list(product_fieldsets)
 
@@ -294,6 +297,16 @@ order_list_display = ("id", "billing_name", "total", "time", "status",
                       "transaction_id")
 if HAS_PDF:
     order_list_display += ("invoice",)
+
+if settings.MATKAHUOLTO:
+    order_list_display += ("mh_shipment_number", "get_mh_card",)
+    shipping_fields += [
+        "delivery_method", 
+        "mh_service_point_full", 
+        "mh_service_point_id_name", 
+        "mh_shipment_number",
+    ]
+
 
 
 class OrderAdmin(admin.ModelAdmin):
