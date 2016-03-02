@@ -325,3 +325,12 @@ register_setting(
     editable=False,
     default=True,
 )
+
+register_setting(
+    name="SHOP_USE_HIERARCHICAL_URLS",
+    label=_("Use hierarchical product URLs"),
+    description="If set and a product only belongs to a single category, "
+        "generate the product's URL in terms of that category.",
+    editable=False,
+    default=False,
+)

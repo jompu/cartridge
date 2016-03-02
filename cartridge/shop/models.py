@@ -135,7 +135,24 @@ class Product(Displayable, Priced, RichText, AdminThumbMixin):
 
     @models.permalink
     def get_absolute_url(self):
+        if settings.SHOP_USE_HIERARCHICAL_URLS:
+            category = self.get_category()
+            if category:
+                return ("shop_category_product", (), {
+                    "category_slug": category.get_raw_slug(),
+                    "slug": self.slug,
+                    "product_id": self.id})
         return ("shop_product", (), {"slug": self.slug})
+
+    def get_category(self):
+        """
+        Returns the single category this product is associated with, or None
+        if the number of categories is not exactly 1.
+        """
+        categories = self.categories.all()
+        if len(categories) == 1:
+            return categories[0]
+        return None
 
     def copy_default_variation(self):
         """
@@ -404,6 +421,14 @@ class Category(Page, RichText):
                 filters.append(products)
             return reduce(operator, filters)
         return products
+
+    def get_raw_slug(self):
+        """
+        Returns this object's slug stripped of its parent's slug.
+        """
+        if not self.parent or not self.parent.slug:
+            return self.slug
+        return self.slug.lstrip(self.parent.slug).lstrip('/')
 
 
 @python_2_unicode_compatible
