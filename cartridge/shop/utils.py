@@ -50,13 +50,12 @@ def recalculate_cart(request):
         request.session['cart'] = request.cart.pk
     request.cart = Cart.objects.from_request(request)
 
-    names = ("free_shipping", "discount_code", "discount_total")
-    clear_session(request, *names)
-
     discount_code = request.session.get("discount_code", "")
     if discount_code:
         # Clear out any previously defined discount code
         # session vars.
+        names = ("free_shipping", "discount_code", "discount_total")
+        clear_session(request, *names)
         discount_form = DiscountForm(request, {"discount_code": discount_code})
         if discount_form.is_valid():
             discount_form.set_discount()
