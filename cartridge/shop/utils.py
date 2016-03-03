@@ -76,7 +76,6 @@ def set_shipping(request, shipping_type, shipping_total):
     """
     Stores the shipping type and total in the session.
     """
-    print _str(shipping_type)
     request.session["shipping_type"] = _str(shipping_type)
     request.session["shipping_total"] = _str(shipping_total)
 

@@ -114,7 +114,7 @@ class Product(Displayable, Priced, RichText, AdminThumbMixin):
 
     search_fields = {"variations__sku": 100}
 
-    weight = models.IntegerField(_("Weight"), blank=True, null=True, help_text=_("Define primary order with weight."))
+    weight = models.IntegerField(_("Weight"), blank=True, null=True, help_text=_("Set the relevance of products with the weight."))
 
     class Meta:
         verbose_name = _("Product")
@@ -368,8 +368,6 @@ class Category(Page, RichText):
         "products must match all specified filters, otherwise products "
         "can match any specified filter."))
 
-    weight = models.IntegerField(_("Weight"), blank=True, null=True, help_text=_("Set the relevance of products with the weight."))
-
     class Meta:
         verbose_name = _("Product category")
         verbose_name_plural = _("Product categories")
@@ -472,19 +470,20 @@ class Order(SiteRelated):
                             default=settings.SHOP_ORDER_STATUS_CHOICES[0][0])
 
     delivery_method = CharField(_("Delivery method"), blank=True, default="pickup",
-        choices=(("pickup",_("Pickup")),("mh",_("Matkahuolto"))), max_length=254)
-    mh_service_point_full = CharField( 
-        _("Matkahuolto service point"),
+        choices=settings.SHOP_DELIVERY_METHODS, max_length=254)
+
+    delivery_service_point_full = CharField( 
+        _("Service point for selected method"),
         blank=True,
         max_length=254
     )
-    mh_service_point_id_name = CharField( 
-        _("Matkahuolto service point id and name"),
+    delivery_service_point_id_name = CharField( 
+        _("Delivery service point id and name"),
         blank=True,
         max_length=254
     )
-    mh_shipment_number = CharField( 
-        _("Matkahuolto shipment number"),
+    delivery_shipment_number = CharField( 
+        _("Shipment number for delivery"),
         default="",
         blank=True,
         max_length=255
@@ -586,23 +585,20 @@ class Order(SiteRelated):
     invoice.allow_tags = True
     invoice.short_description = ""
 
-    def get_mh_card(self):
-        title = _("Get MH card")
-        if self.delivery_method == "mh":
-            if not self.mh_shipment_number:
-                return mark_safe("<script>open_download_card_form = function(url, title) { \
+    def begin_delivery(self):
+        title = _("Begin the delivery")
+        if self.delivery_method != "pickup":
+            if not self.delivery_shipment_number:
+                return mark_safe("<script>open_begin_delivery_form = function(url, title) { \
                       w=window.open(url, title,'height=500,width=700,scrollbars=yes'); \
                       w.onunload = function() {window.location.reload(true);}; \
                       if(window.focus){w.focus();}};</script> \
                       <a href='#' onclick='javascript: \
-                      open_download_card_form(\"/matkahuolto/download_card_form/%d\", \"%s\")'>%s</a>" \
+                      open_begin_delivery_form(\"/" + self.delivery_method + "/begin_delivery_form/%d\", \"%s\")'>%s</a>" \
                     % (self.id, title, title))
-            else:
-                return mark_safe('<a target="_blank"' \
-                    'href="https://extservices.matkahuolto.fi/mpakettiext/?0&amp;gatewayed=true.">'
-                    'Edit in MPaketti service</a>')
-        else:
-            return ""
+            elif self.delivery_method in settings.SHOP_DELIVERY_ADMIN:
+                return mark_safe('<a target="_blank" href="%s">%s</a>' % (settings.SHOP_DELIVERY_ADMIN[self.delivery_method]["url"], settings.SHOP_DELIVERY_ADMIN[self.delivery_method]["link_name"]))
+        return ""
 
 
 class Cart(models.Model):

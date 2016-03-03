@@ -334,3 +334,19 @@ register_setting(
     editable=False,
     default=False,
 )
+
+register_setting(
+    name="SHOP_DELIVERY_METHODS",
+    label=_("A list of available delivery methods."),
+    description="A list of available delivery methods.",
+    editable=False,
+    default=(("pickup",_("Pickup")),),
+)
+
+register_setting(
+    name="SHOP_DELIVERY_ADMIN",
+    label=_("A dictonary of link data to parcel services admin."),
+    description="A dictonary of link data to parcel services admin.",
+    editable=False,
+    default={},
+)

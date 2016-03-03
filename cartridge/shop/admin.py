@@ -51,9 +51,6 @@ from cartridge.shop.models import ProductVariation, ProductOption, Order
 from cartridge.shop.models import OrderItem, Sale, DiscountCode
 from cartridge.shop.views import HAS_PDF
 
-from django.contrib.sites.models import Site
-current_domain = Site.objects.get_current().domain
-
 # Lists of field names.
 option_fields = [f.name for f in ProductVariation.option_fields()]
 _flds = lambda s: [f.name for f in Order._meta.fields if f.name.startswith(s)]
@@ -294,18 +291,16 @@ def address_pairs(fields):
 
 
 order_list_display = ("id", "billing_name", "total", "time", "status",
-                      "transaction_id")
+                      "transaction_id", "delivery_shipment_number", "begin_delivery",)
 if HAS_PDF:
     order_list_display += ("invoice",)
 
-if settings.MATKAHUOLTO:
-    order_list_display += ("mh_shipment_number", "get_mh_card",)
-    shipping_fields += [
-        "delivery_method", 
-        "mh_service_point_full", 
-        "mh_service_point_id_name", 
-        "mh_shipment_number",
-    ]
+shipping_fields += [
+    "delivery_method", 
+    "delivery_service_point_full", 
+    "delivery_service_point_id_name", 
+    "delivery_shipment_number",
+]
 
 
 
