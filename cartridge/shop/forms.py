@@ -82,7 +82,7 @@ class AddProductForm(forms.Form):
             for i, name in enumerate(option_names):
                 values = [_f for _f in set(option_values[i]) if _f]
                 if values:
-                    field = forms.ChoiceField(label=option_labels[i],
+                    field = forms.ChoiceField(label=_(option_labels[i]),
                                               choices=make_choices(values))
                     self.fields[name] = field
 
