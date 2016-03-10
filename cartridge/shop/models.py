@@ -254,9 +254,9 @@ class ProductVariation(with_metaclass(ProductVariationMetaclass, Priced)):
         for field in self.option_fields():
             name = getattr(self, field.name)
             if name is not None:
-                option = u"%s: %s" % (field.verbose_name, name)
+                option = u"%s: %s" % (_(field.verbose_name).lower(), name)
                 options.append(option)
-        result = u"%s %s" % (str(self.product), u", ".join(options))
+        result = u"%s (%s)" % (str(self.product), u", ".join(options))
         return result.strip()
 
     def save(self, *args, **kwargs):
