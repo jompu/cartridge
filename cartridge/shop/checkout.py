@@ -36,7 +36,7 @@ def default_billship_handler(request, order_form):
     """
     if not request.session.get("free_shipping"):
         settings.use_editable()
-        set_shipping(request, "Flat rate shipping",
+        set_shipping(request, _("Flat rate shipping"),
                      settings.SHOP_DEFAULT_SHIPPING_VALUE)
 
 
@@ -51,7 +51,7 @@ def default_tax_handler(request, order_form):
     accessible via ``request.cart``
     """
     settings.use_editable()
-    set_tax(request, "Tax", 0)
+    set_tax(request, _("Tax"), 0)
 
 
 def default_payment_handler(request, order_form, order):
