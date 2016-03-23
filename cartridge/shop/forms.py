@@ -278,7 +278,7 @@ class DiscountForm(forms.ModelForm):
             total = self._request.cart.calculate_discount(discount)
             if discount.free_shipping:
                 set_shipping(self._request, _("Free shipping"), 0)
-            else:
+            elif self._request.session.get("shipping_type", "") == _("Free shipping"):
                 # A previously entered discount code providing free
                 # shipping may have been entered prior to this
                 # discount code beign entered, so clear out any
