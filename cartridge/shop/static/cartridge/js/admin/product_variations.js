@@ -35,14 +35,14 @@ jQuery(function($) {
     // Grappelli removes the string value of inline objects, so show these
     // for the product variations.
     if (grappelli) {
-        if (variationsFieldset.find('h3').length > 2) {
+        //if (variationsFieldset.find('h3').length > 2) {
             $.each(variationsFieldset.find('h3'), function(i, variation) {
                 variation = $(variation);
                 var titleText = variation.html().split('</b>')[1];
                 var titleHtml = '<div class="">' + titleText + '</div>';
                 variation.parent().find('.sku input').before(titleHtml);
             });
-        }
+        //}
     }
 
     $('.variations-help').insertAfter('.create-variations h2').show();
