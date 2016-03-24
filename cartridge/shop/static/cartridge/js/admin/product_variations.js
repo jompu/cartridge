@@ -39,7 +39,7 @@ jQuery(function($) {
             $.each(variationsFieldset.find('h3'), function(i, variation) {
                 variation = $(variation);
                 var titleText = variation.html().split('</b>')[1];
-                var titleHtml = '<div class="tiny">' + titleText + '</div>';
+                var titleHtml = '<div class="">' + titleText + '</div>';
                 variation.parent().find('.sku input').before(titleHtml);
             });
         }
